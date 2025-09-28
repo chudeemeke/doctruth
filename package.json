@@ -24,7 +24,7 @@
   "author": "DocTruth Contributors",
   "main": "src/index.js",
   "bin": {
-    "doctruth": "./bin/doctruth.js"
+    "doctruth": "bin/doctruth.js"
   },
   "files": [
     "bin/",
