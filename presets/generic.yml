@@ -1,0 +1,102 @@
+# DocTruth Generic Preset - Works with any project
+version: 1
+project: Generic Project
+
+truth_sources:
+  # File System
+  - name: Project Structure
+    command: ls -la | head -25
+    essential: true
+    category: Structure
+
+  - name: Directory Tree
+    command: find . -type d -not -path "./.git/*" -not -path "./node_modules/*" | head -30
+    category: Structure
+
+  - name: File Types
+    command: find . -type f -name "*.*" | rev | cut -d. -f1 | rev | sort | uniq -c | sort -rn | head -10
+    category: Structure
+
+  # Version Control
+  - name: Git Status
+    command: git status --short 2>/dev/null || echo "Not a git repository"
+    category: VCS
+
+  - name: Current Branch
+    command: git branch --show-current 2>/dev/null || echo "N/A"
+    category: VCS
+
+  - name: Recent Commits
+    command: git log --oneline -10 2>/dev/null || echo "No git history"
+    category: VCS
+
+  - name: Remote Origin
+    command: git remote get-url origin 2>/dev/null || echo "No remote configured"
+    category: VCS
+
+  # Documentation
+  - name: README Files
+    command: find . -iname "readme*" -type f | head -5
+    category: Documentation
+
+  - name: Documentation Files
+    command: find . -name "*.md" -o -name "*.rst" -o -name "*.txt" | head -15
+    category: Documentation
+
+  # Common Files
+  - name: Configuration Files
+    command: ls -la *.json *.yml *.yaml *.toml *.ini *.cfg 2>/dev/null | head -10 || echo "No config files in root"
+    category: Configuration
+
+  - name: Build Files
+    command: ls -la Makefile* Dockerfile* docker-compose* *.gradle build.* 2>/dev/null | head -5 || echo "No build files found"
+    category: Build
+
+validations:
+  - name: Project Directory Exists
+    command: '[ -d . ] && echo "✓ Valid directory" || echo "✗ Invalid directory"'
+    required: true
+
+  - name: Not Empty Directory
+    command: '[ "$(ls -A)" ] && echo "✓ Has files" || echo "✗ Empty directory"'
+    required: false
+
+  - name: Has Documentation
+    command: '[ -f README.md ] || [ -f README.rst ] || [ -f README.txt ] && echo "✓ Has README" || echo "✗ No README"'
+    required: false
+
+working_examples:
+  - name: Generate Truth
+    command: echo "doctruth"
+
+  - name: Check for Changes
+    command: echo "doctruth --check"
+
+  - name: Watch Mode
+    command: echo "doctruth --watch"
+
+benchmarks:
+  - name: Total Files
+    command: find . -type f -not -path "./.git/*" -not -path "./node_modules/*" | wc -l
+    unit: files
+
+  - name: Total Directories
+    command: find . -type d -not -path "./.git/*" -not -path "./node_modules/*" | wc -l
+    unit: directories
+
+  - name: Project Size
+    command: du -sh . 2>/dev/null | cut -f1
+    unit: ""
+
+platform:
+  - name: Operating System
+    command: uname -s 2>/dev/null || echo "Windows"
+
+  - name: Current User
+    command: whoami
+
+  - name: Current Directory
+    command: pwd || cd
+
+  - name: Timestamp
+    command: date "+%Y-%m-%d %H:%M:%S %Z"

@@ -1,0 +1,89 @@
+# DocTruth configuration for a React application
+version: 1
+project: React App Example
+output: docs/CURRENT_TRUTH.md
+
+extends: nodejs  # Inherit Node.js checks
+
+truth_sources:
+  # React Specific
+  - name: "React Version"
+    command: "npm list react | grep react@ | head -1"
+    essential: true
+    category: "React"
+
+  - name: "React Scripts Version"
+    command: "npm list react-scripts | grep react-scripts@ | head -1 || echo 'Not using Create React App'"
+    category: "React"
+
+  - name: "Components Count"
+    command: "find src -name '*.jsx' -o -name '*.tsx' | wc -l"
+    category: "React"
+
+  - name: "Page Components"
+    command: "find src -name '*Page.jsx' -o -name '*Page.tsx' | xargs -I {} basename {}"
+    category: "React"
+
+  # Build & Development
+  - name: "Build Output"
+    command: "[ -d build ] && du -sh build | cut -f1 || echo 'Not built yet'"
+    category: "Build"
+
+  - name: "Public Assets"
+    command: "ls -la public/ | head -10"
+    category: "Assets"
+
+  - name: "Environment Files"
+    command: "ls -la .env* 2>/dev/null | awk '{print $9}' || echo 'No env files'"
+    category: "Configuration"
+
+  # Testing
+  - name: "Test Files"
+    command: "find src -name '*.test.js' -o -name '*.test.tsx' | wc -l"
+    category: "Testing"
+
+  - name: "Test Coverage"
+    command: "[ -f coverage/coverage-summary.json ] && cat coverage/coverage-summary.json | grep '\"total\"' | head -4 || echo 'No coverage data'"
+    category: "Testing"
+
+validations:
+  - name: "React installed"
+    command: "npm list react >/dev/null 2>&1 && echo '✓ React found' || echo '✗ React not installed'"
+    required: true
+
+  - name: "Build succeeds"
+    command: "[ -f package.json ] && grep -q '\"build\"' package.json && echo '✓ Build script exists' || echo '✗ No build script'"
+    required: false
+
+  - name: "Tests pass"
+    command: "CI=true npm test -- --passWithNoTests 2>/dev/null && echo '✓ Tests pass' || echo '✗ Tests fail or not configured'"
+    required: false
+
+working_examples:
+  - name: "Install dependencies"
+    command: "echo 'npm install'"
+
+  - name: "Start development server"
+    command: "echo 'npm start'"
+
+  - name: "Build for production"
+    command: "echo 'npm run build'"
+
+  - name: "Run tests"
+    command: "echo 'npm test'"
+
+  - name: "Run tests with coverage"
+    command: "echo 'npm test -- --coverage'"
+
+benchmarks:
+  - name: "Build time"
+    command: "[ -f package.json ] && { time npm run build >/dev/null 2>&1; } 2>&1 | grep real | awk '{print $2}' || echo 'N/A'"
+    unit: ""
+
+  - name: "Bundle size"
+    command: "[ -d build/static/js ] && du -sh build/static/js | cut -f1 || echo 'Not built'"
+    unit: ""
+
+  - name: "Component count"
+    command: "find src -name '*.jsx' -o -name '*.tsx' | wc -l"
+    unit: "files"

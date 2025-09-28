@@ -1,0 +1,111 @@
+# DocTruth Preset for Node.js Projects
+version: 1
+project: Node.js Project
+
+truth_sources:
+  # Version Information
+  - name: Node Version
+    command: node --version
+    essential: true
+    category: Environment
+
+  - name: NPM Version
+    command: npm --version
+    essential: true
+    category: Environment
+
+  - name: Package Name and Version
+    command: node -p "const p = require('./package.json'); `${p.name}@${p.version}`"
+    essential: true
+    category: Project
+
+  # Project Structure
+  - name: Main Entry Point
+    command: node -p "require('./package.json').main || 'index.js'"
+    category: Project
+
+  - name: Available NPM Scripts
+    command: npm run 2>/dev/null | grep "^  " | sed 's/^  //' | head -20
+    category: Project
+
+  - name: Source Files
+    command: find . -name "*.js" -o -name "*.ts" -not -path "./node_modules/*" | head -30
+    category: Structure
+
+  # Dependencies
+  - name: Production Dependencies
+    command: npm list --prod --depth=0 2>/dev/null | grep "├──\\|└──" | head -20
+    category: Dependencies
+
+  - name: Dev Dependencies
+    command: npm list --dev --depth=0 2>/dev/null | grep "├──\\|└──" | head -20
+    category: Dependencies
+
+  - name: Outdated Packages
+    command: npm outdated 2>/dev/null | head -10 || echo "All packages up to date"
+    category: Dependencies
+
+  # Testing
+  - name: Test Framework
+    command: |
+      if [ -f package.json ]; then
+        grep -E '"(jest|mocha|tape|ava|jasmine)"' package.json | head -1 || echo "No test framework detected"
+      fi
+    category: Testing
+
+  - name: Test Files
+    command: find . -name "*.test.js" -o -name "*.spec.js" -not -path "./node_modules/*" | head -10
+    category: Testing
+
+validations:
+  - name: package.json exists
+    command: '[ -f package.json ] && echo "✓ Found" || echo "✗ Missing"'
+    required: true
+
+  - name: node_modules exists
+    command: '[ -d node_modules ] && echo "✓ Installed" || echo "✗ Run npm install"'
+    required: false
+
+  - name: No vulnerable packages
+    command: npm audit --audit-level=high 2>/dev/null | grep "found 0" && echo "✓ No vulnerabilities" || echo "✗ Vulnerabilities found"
+    required: false
+
+  - name: Lock file exists
+    command: '[ -f package-lock.json ] || [ -f yarn.lock ] && echo "✓ Lock file present" || echo "✗ No lock file"'
+    required: false
+
+working_examples:
+  - name: Install Dependencies
+    command: echo "npm install"
+
+  - name: Run Tests
+    command: echo "npm test"
+
+  - name: Start Application
+    command: echo "npm start"
+
+  - name: Build Project
+    command: echo "npm run build"
+
+benchmarks:
+  - name: Install Speed
+    command: '{ time npm ci --silent >/dev/null 2>&1; } 2>&1 | grep real | awk "{print $2}" || echo "N/A"'
+    unit: seconds
+
+  - name: node_modules Size
+    command: du -sh node_modules 2>/dev/null | cut -f1 || echo "0"
+    unit: ""
+
+  - name: Total JS Files
+    command: find . -name "*.js" -not -path "./node_modules/*" | wc -l
+    unit: files
+
+platform:
+  - name: OS
+    command: node -p "process.platform"
+
+  - name: Architecture
+    command: node -p "process.arch"
+
+  - name: Node Path
+    command: which node

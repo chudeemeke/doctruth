@@ -1,0 +1,128 @@
+# DocTruth Preset for Python Projects
+version: 1
+project: Python Project
+
+truth_sources:
+  # Version Information
+  - name: Python Version
+    command: python --version 2>&1
+    essential: true
+    category: Environment
+
+  - name: Pip Version
+    command: pip --version 2>/dev/null || pip3 --version
+    essential: true
+    category: Environment
+
+  # Project Structure
+  - name: Python Files
+    command: find . -name "*.py" -not -path "./.venv/*" -not -path "./venv/*" | head -30
+    category: Structure
+
+  - name: Project Type
+    command: |
+      if [ -f setup.py ]; then echo "Package (setup.py)";
+      elif [ -f pyproject.toml ]; then echo "Modern Package (pyproject.toml)";
+      elif [ -f requirements.txt ]; then echo "Application (requirements.txt)";
+      elif [ -f Pipfile ]; then echo "Pipenv Project";
+      else echo "Basic Python Project"; fi
+    category: Project
+
+  - name: Entry Points
+    command: grep -l "if __name__ == .__main__." *.py 2>/dev/null | head -5 || echo "No entry points in root"
+    category: Project
+
+  # Dependencies
+  - name: Installed Packages
+    command: pip list 2>/dev/null | head -20 || pip3 list | head -20
+    category: Dependencies
+
+  - name: Requirements File
+    command: '[ -f requirements.txt ] && head -20 requirements.txt || echo "No requirements.txt"'
+    category: Dependencies
+
+  - name: Virtual Environment
+    command: |
+      if [ -d .venv ]; then echo "Virtual environment: .venv";
+      elif [ -d venv ]; then echo "Virtual environment: venv";
+      elif [ -n "$VIRTUAL_ENV" ]; then echo "Active venv: $VIRTUAL_ENV";
+      else echo "No virtual environment detected"; fi
+    category: Environment
+
+  # Testing
+  - name: Test Framework
+    command: |
+      pip list 2>/dev/null | grep -E "pytest|unittest|nose" | head -1 || echo "No test framework installed"
+    category: Testing
+
+  - name: Test Files
+    command: find . -name "test_*.py" -o -name "*_test.py" -not -path "./venv/*" | head -10
+    category: Testing
+
+  # Code Quality
+  - name: Linting Tools
+    command: |
+      pip list 2>/dev/null | grep -E "pylint|flake8|black|mypy|ruff" || echo "No linting tools installed"
+    category: Quality
+
+validations:
+  - name: Python executable exists
+    command: which python || which python3 && echo "✓ Found" || echo "✗ Python not found"
+    required: true
+
+  - name: Pip available
+    command: which pip || which pip3 && echo "✓ Found" || echo "✗ Pip not found"
+    required: true
+
+  - name: Requirements installable
+    command: |
+      if [ -f requirements.txt ]; then
+        pip install --dry-run -r requirements.txt >/dev/null 2>&1 && echo "✓ Valid" || echo "✗ Invalid requirements"
+      else
+        echo "✓ No requirements.txt"
+      fi
+    required: false
+
+  - name: No syntax errors
+    command: python -m py_compile *.py 2>/dev/null && echo "✓ Valid Python" || echo "✗ Syntax errors"
+    required: false
+
+working_examples:
+  - name: Install Dependencies
+    command: echo "pip install -r requirements.txt"
+
+  - name: Run Tests
+    command: echo "pytest"
+    description: "Run with pytest if installed"
+
+  - name: Run Main Script
+    command: echo "python main.py"
+
+  - name: Create Virtual Environment
+    command: echo "python -m venv .venv"
+
+  - name: Activate Virtual Environment
+    command: echo "source .venv/bin/activate  # On Unix/Mac"
+
+benchmarks:
+  - name: Import Time (stdlib)
+    command: python -c "import time; s=time.time(); import sys, os, json; print(f'{time.time()-s:.3f}')"
+    unit: seconds
+
+  - name: Total Python Files
+    command: find . -name "*.py" -not -path "./venv/*" -not -path "./.venv/*" | wc -l
+    unit: files
+
+  - name: Lines of Code
+    command: find . -name "*.py" -not -path "./venv/*" -exec wc -l {} + | tail -1 | awk '{print $1}'
+    unit: lines
+
+platform:
+  - name: OS
+    command: python -c "import platform; print(platform.system())"
+
+  - name: Architecture
+    command: python -c "import platform; print(platform.machine())"
+
+  - name: Python Implementation
+    command: python -c "import platform; print(platform.python_implementation())"
