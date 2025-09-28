@@ -12,13 +12,13 @@
     "devops",
     "testing"
   ],
-  "homepage": "https://github.com/doctruth/doctruth",
+  "homepage": "https://github.com/chudeemeke/doctruth",
   "bugs": {
-    "url": "https://github.com/doctruth/doctruth/issues"
+    "url": "https://github.com/chudeemeke/doctruth/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/doctruth/doctruth.git"
+    "url": "git+https://github.com/chudeemeke/doctruth.git"
   },
   "license": "MIT",
   "author": "DocTruth Contributors",
