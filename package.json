@@ -21,7 +21,7 @@
     "url": "git+https://github.com/chudeemeke/doctruth.git"
   },
   "license": "MIT",
-  "author": "DocTruth Contributors",
+  "author": "Chude <chude@emeke.org>",
   "main": "src/index.js",
   "bin": {
     "doctruth": "bin/doctruth.js"
