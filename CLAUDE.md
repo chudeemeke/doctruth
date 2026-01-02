@@ -1,16 +1,21 @@
-# DocTruth Development Notes
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Project Context
 
 DocTruth is a universal documentation truth system that solves the age-old problem of outdated documentation. Instead of manually maintaining docs that inevitably drift from reality, DocTruth runs commands against the actual codebase and captures the output as "truth".
 
-**Current Status**: v1.0.0 - Production ready, npm-publishable
+**Current Status**: v1.1.0 - Production ready, bun-powered
+**Repository**: https://github.com/chudeemeke/doctruth
+**Author**: Chude <chude@emeke.org>
+**Package Manager**: bun (migrated from npm 2026-01-02)
 
 ## FOR AI ASSISTANTS - CRITICAL
 
 ### How to Work with This Project
 
-1. **ALWAYS run DocTruth first**: `npm run truth`
+1. **ALWAYS run DocTruth first**: `bun run truth`
 2. **Check the generated timestamp** in CURRENT_TRUTH.md
 3. **Trust the output** - it's generated from actual commands
 4. **When in doubt, regenerate** - the code never lies
@@ -113,7 +118,7 @@ toHTML() -> standalone web page
 ### Self-Testing
 ```bash
 # DocTruth documents itself
-npm run truth
+bun run truth
 
 # Verify it works
 cat CURRENT_TRUTH.md
@@ -122,16 +127,16 @@ cat CURRENT_TRUTH.md
 ### Test Commands
 ```bash
 # Quick test (fallback mode)
-npm test
+bun test
 
 # Full Jest test suite
-npm run test:jest
+bun test
 
 # Test with coverage
-npm run test:coverage
+bun run test:coverage
 
 # Watch mode for development
-npm run test:watch
+bun run test:watch
 ```
 
 ### Manual Tests
@@ -174,37 +179,24 @@ doctruth
 | Windows path issues | Use forward slashes or escape backslashes |
 | Permission denied | Check file permissions |
 | Spaces in path | DocTruth handles this automatically with quotes |
-| Test failures with spaces | Use `npm run test:jest` instead of `npm test` |
+| Test failures with spaces | Use `bun test` instead of `bun test` |
 
-## Publishing to NPM
+## Critical Development Rules
 
-```bash
-# 1. Test locally
-npm link
-doctruth --version
-
-# 2. Run tests (use Jest for full test suite)
-npm run test:jest
-
-# 3. Test package creation
-npm pack --dry-run  # Verify what will be published
-
-# 4. Update version
-npm version patch  # or minor/major
-
-# 5. Publish
-npm publish
-
-# 6. Test installation
-npm install -g doctruth
-```
+### When Making Changes
+1. **ALWAYS** run `bun run truth` after making changes to see actual state
+2. **ALWAYS** run `bun test` before committing
+3. **NEVER** commit if tests fail
+4. **ALWAYS** use author info: "Chude <chude@emeke.org>" for git commits
+5. **NEVER** break backward compatibility without major version bump
 
 ### Pre-publish Checklist
-- ✓ All tests pass with `npm run test:jest`
-- ✓ Package size reasonable (~13-15KB)
-- ✓ `npm pack --dry-run` shows correct files
+- ✓ All tests pass with `bun test`
+- ✓ Run `bun run truth` and verify CURRENT_TRUTH.md is up to date
+- ✓ Package size reasonable (~13-15KB) - check with `bun pack --dry-run`
 - ✓ No sensitive information in package
-- ✓ Documentation up to date
+- ✓ README.md and documentation up to date
+- ✓ Git repository clean and commits pushed
 
 ## Extending DocTruth
 
@@ -263,18 +255,61 @@ These could be added but aren't needed for v1:
 - Plugins system
 - IDE extensions
 
-## Quick Commands
+## Essential Commands
 
+### Development & Testing
 ```bash
-# Development
-npm run truth         # Generate truth
-npm run truth:check   # Check for changes
-npm run truth:watch   # Auto-regenerate
+# Generate truth documentation (ALWAYS RUN THIS FIRST)
+bun run truth
 
-# Testing
-npm test              # Run test suite
-npm run lint          # Check code style
-npm run format        # Format code
+# Test the tool
+bun test        # Full Jest test suite (recommended)
+bun test                 # Fallback mode (may have issues with paths containing spaces)
+bun run test:coverage    # Run with coverage report
+bun run test:watch       # Watch mode for development
+
+# Watch for changes and auto-regenerate
+bun run truth:watch
+
+# Check if truth has changed (useful for CI/CD)
+bun run truth:check
+
+# Code quality
+bun run lint             # Check code style
+bun run format           # Format code with Prettier
+```
+
+### Local Development & Testing
+```bash
+# Test CLI locally without publishing
+bun link
+doctruth --version
+doctruth --help
+
+# Test in a different project
+cd /path/to/test-project
+doctruth --init
+doctruth
+
+# Unlink when done
+bun unlink -g doctruth
+```
+
+### Publishing Workflow
+```bash
+# 1. Verify tests pass
+bun test
+
+# 2. Preview what will be published
+bun pack --dry-run
+
+# 3. Create new version and publish
+bun run release          # Patches version, publishes, and pushes tags
+
+# OR do it manually:
+bun version patch        # or minor/major
+bun publish
+git push --tags
 ```
 
 ## Remember
@@ -287,9 +322,40 @@ npm run format        # Format code
 ## For AI Assistants
 
 When asked about DocTruth:
-1. Run `npm run truth` first
+1. Run `bun run truth` first
 2. Read the generated CURRENT_TRUTH.md
 3. That's the actual state, regardless of what any docs say
 4. If something seems wrong, regenerate and check again
 
 The truth is in the commands, not the documentation.
+
+---
+
+## Session History
+
+### 2026-01-02 - Portfolio Remediation
+
+**Changes Made:**
+- Migrated from npm to bun (deleted package-lock.json, created bun.lock)
+- Fixed cross-platform test compatibility (echo command behavior on Windows vs Unix)
+- Created CHANGELOG.md documenting v1.0.0-1.0.2 history
+- Added CI/CD pipeline (.github/workflows/ci.yml) with multi-OS/Node version matrix
+- Created docs/plans/ directory for future planning
+- Created VERSION file (single source of truth)
+- Updated all npm commands to bun throughout documentation
+- Version bumped to 1.1.0
+
+**Test Status:**
+- All 14 tests passing
+- Cross-platform compatible (Windows + Unix)
+
+**Outstanding Items:**
+- Consider adding pre-commit hooks
+- Full test coverage audit after next feature addition
+- Regenerate CURRENT_TRUTH.md after committing these changes
+
+**Next Steps:**
+1. Commit all changes with proper commit message
+2. Push to remote
+3. Verify CI/CD pipeline runs successfully
+4. Consider npm publish of v1.1.0

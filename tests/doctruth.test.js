@@ -37,7 +37,8 @@ describe('DocTruth', () => {
 
   test('should run simple command', () => {
     const doctruth = new DocTruth();
-    const output = doctruth.runCommand('echo "test"');
+    // Use node for cross-platform consistency (echo behaves differently on Windows vs Unix)
+    const output = doctruth.runCommand('node -e "console.log(\'test\')"');
     expect(output).toBe('test');
   });
 

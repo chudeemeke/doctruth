@@ -1,6 +1,6 @@
 {
   "name": "doctruth",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "Universal Documentation Truth System - Never lie about your documentation again",
   "keywords": [
     "documentation",
@@ -42,7 +42,7 @@
     "truth:check": "./bin/doctruth.js --check",
     "truth:watch": "./bin/doctruth.js --watch",
     "prepublishOnly": "echo 'Ready to publish'",
-    "release": "npm version patch && npm publish && git push --tags"
+    "release": "bun version patch && bun publish && git push --tags"
   },
   "dependencies": {
     "chalk": "^4.1.2",
